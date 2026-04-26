@@ -20,6 +20,10 @@ gradle test jar
 
 The resulting plugin jar is written to `build/libs/josm-audiowptmarker-<version>.jar`.
 
+## Private Examples
+
+`examples-private/` is intentionally git-ignored because it may contain private GPX tracks and audio recordings. Use it only for local manual testing and never include files from it in commits, releases, or public documentation.
+
 ## JOSM Integration Notes
 
 The plugin operates on marker layers that JOSM has already created from a GPX layer with linked audio files. It does not import GPX/audio files itself.

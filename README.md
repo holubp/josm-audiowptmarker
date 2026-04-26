@@ -86,7 +86,3 @@ gradle build
 ```
 
 The plugin jar is written to `build/libs/`.
-
-## Private Examples
-
-`examples-private/` is intentionally git-ignored. Do not commit GPX/audio recordings from that directory.
