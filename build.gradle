@@ -1,0 +1,43 @@
+plugins {
+    id "java"
+}
+
+group = "org.openstreetmap.josm.plugins"
+version = "0.1.0"
+
+def josmVersion = "19555"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+dependencies {
+    compileOnly "org.openstreetmap.josm:josm:${josmVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter:5.12.2"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = 17
+}
+
+jar {
+    manifest {
+        attributes(
+                "Plugin-Class": "org.openstreetmap.josm.plugins.audiowptmarker.AudioWptMarkerPlugin",
+                "Plugin-Description": "Review and navigate OsmTracker audio waypoints in JOSM.",
+                "Plugin-Version": project.version,
+                "Plugin-Mainversion": josmVersion,
+                "Plugin-Minimum-Java-Version": "17",
+                "Plugin-Author": "Petr Holub",
+                "Plugin-Icon": "markers/audio-tracer"
+        )
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
