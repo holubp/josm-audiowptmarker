@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "org.openstreetmap.josm.plugins"
-version = "0.1.4"
+version = "0.1.5"
 
 def josmVersion = "19555"
 

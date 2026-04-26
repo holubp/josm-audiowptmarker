@@ -13,6 +13,7 @@ JOSM plugin for reviewing OsmTracker audio waypoints from an existing marker lay
 - Shift variants of the navigation shortcuts also start playback by invoking JOSM's `AudioMarker.play()` path.
 - Default shortcuts are `Ctrl+Alt+J/K/L` for previous/current/next and `Ctrl+Alt+Shift+J/K/L` for previous/current/next and play.
 - Plugin-owned SVG icons are bundled in the jar so the dialog does not depend on JOSM internal image paths.
+- OsmTracker `.3gp`, `.3gpp`, and `.amr` links are treated as audio waypoints even when JOSM represents them as web markers.
 
 ## Build
 

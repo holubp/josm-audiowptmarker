@@ -1,15 +1,20 @@
 package org.openstreetmap.josm.plugins.audiowptmarker;
 
 import java.io.File;
+import java.awt.event.ActionEvent;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 import org.openstreetmap.josm.data.gpx.GpxData;
+import org.openstreetmap.josm.data.gpx.GpxLink;
+import org.openstreetmap.josm.data.gpx.WayPoint;
 import org.openstreetmap.josm.gui.MainApplication;
 import org.openstreetmap.josm.gui.MapFrame;
 import org.openstreetmap.josm.gui.MapView;
@@ -18,11 +23,16 @@ import org.openstreetmap.josm.gui.layer.Layer;
 import org.openstreetmap.josm.gui.layer.markerlayer.AudioMarker;
 import org.openstreetmap.josm.gui.layer.markerlayer.Marker;
 import org.openstreetmap.josm.gui.layer.markerlayer.MarkerLayer;
+import org.openstreetmap.josm.gui.layer.markerlayer.WebMarker;
 import org.openstreetmap.josm.io.audio.AudioUtil;
 import org.openstreetmap.josm.tools.Logging;
 import org.openstreetmap.josm.tools.date.Interval;
 
 final class AudioWaypointController {
+    private static final List<String> AUDIO_EXTENSIONS = List.of(
+            ".wav", ".mp3", ".aac", ".aif", ".aiff", ".3gp", ".3gpp", ".amr"
+    );
+
     private Layer selectedLayer;
     private List<AudioWaypoint> waypoints = List.of();
     private int currentIndex;
@@ -181,16 +191,25 @@ final class AudioWaypointController {
         Instant trackStart = trackStart(layer).orElse(null);
         List<AudioWaypoint> result = new ArrayList<>();
         for (Marker marker : layer.data) {
-            if (marker instanceof AudioMarker audioMarker) {
+            if (isAudioWaypointMarker(marker)) {
                 Instant absolute = marker.time > 0
                         ? Instant.ofEpochMilli(Math.round(marker.time * 1000.0))
                         : null;
                 double relative = relativeSeconds(marker, trackStart);
-                result.add(new AudioWaypoint(audioMarker, relative, durationSeconds(audioMarker), absolute));
+                result.add(new AudioWaypoint(marker, relative, durationSeconds(marker), absolute));
             }
         }
         result.sort(Comparator.comparingDouble(AudioWaypoint::relativeSeconds));
         return List.copyOf(result);
+    }
+
+    private static boolean isAudioWaypointMarker(Marker marker) {
+        if (marker instanceof AudioMarker) {
+            return true;
+        }
+        return marker instanceof WebMarker && markerUrl(marker)
+                .map(AudioWaypointController::hasAudioExtension)
+                .orElse(false);
     }
 
     private static Optional<Instant> trackStart(MarkerLayer layer) {
@@ -212,8 +231,8 @@ final class AudioWaypointController {
         return marker.offset;
     }
 
-    private static double durationSeconds(AudioMarker marker) {
-        URL url = marker.url();
+    private static double durationSeconds(Marker marker) {
+        URL url = markerUrl(marker).orElse(null);
         if (url == null || !"file".equalsIgnoreCase(url.getProtocol())) {
             return Double.NaN;
         }
@@ -225,6 +244,30 @@ final class AudioWaypointController {
         }
     }
 
+    private static Optional<URL> markerUrl(Marker marker) {
+        if (marker instanceof AudioMarker audioMarker) {
+            return Optional.ofNullable(audioMarker.url());
+        }
+        WayPoint wayPoint = marker.convertToWayPoint();
+        Collection<GpxLink> links = wayPoint.getCollection("meta.links");
+        if (links == null) {
+            return Optional.empty();
+        }
+        for (GpxLink link : links) {
+            try {
+                return Optional.of(new URL(link.uri));
+            } catch (MalformedURLException exception) {
+                Logging.debug(exception);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static boolean hasAudioExtension(URL url) {
+        String path = url.getPath().toLowerCase(java.util.Locale.ROOT);
+        return AUDIO_EXTENSIONS.stream().anyMatch(path::endsWith);
+    }
+
     private void recenterCurrent(boolean play) {
         AudioWaypoint waypoint = waypoints.get(currentIndex);
         MapFrame mapFrame = MainApplication.getMap();
@@ -233,7 +276,12 @@ final class AudioWaypointController {
             mapView.zoomTo(waypoint.marker());
         }
         if (play) {
-            waypoint.marker().play();
+            if (waypoint.marker() instanceof AudioMarker audioMarker) {
+                audioMarker.play();
+            } else {
+                waypoint.marker().actionPerformed(
+                        new ActionEvent(waypoint.marker(), ActionEvent.ACTION_PERFORMED, "audiowptmarker-play"));
+            }
         }
     }
 
