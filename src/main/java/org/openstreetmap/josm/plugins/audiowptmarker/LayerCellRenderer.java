@@ -5,9 +5,9 @@ import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
-import org.openstreetmap.josm.gui.layer.markerlayer.MarkerLayer;
+import org.openstreetmap.josm.gui.layer.Layer;
 
-final class MarkerLayerCellRenderer extends DefaultListCellRenderer {
+final class LayerCellRenderer extends DefaultListCellRenderer {
     @Override
     public Component getListCellRendererComponent(
             JList<?> list,
@@ -17,7 +17,7 @@ final class MarkerLayerCellRenderer extends DefaultListCellRenderer {
             boolean cellHasFocus
     ) {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-        if (value instanceof MarkerLayer layer) {
+        if (value instanceof Layer layer) {
             setText(layer.getName());
             setIcon(layer.getIcon());
         }

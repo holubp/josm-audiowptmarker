@@ -17,16 +17,16 @@ import javax.swing.SwingUtilities;
 
 import org.openstreetmap.josm.gui.MainApplication;
 import org.openstreetmap.josm.gui.dialogs.ToggleDialog;
+import org.openstreetmap.josm.gui.layer.Layer;
 import org.openstreetmap.josm.gui.layer.LayerManager.LayerAddEvent;
 import org.openstreetmap.josm.gui.layer.LayerManager.LayerChangeListener;
 import org.openstreetmap.josm.gui.layer.LayerManager.LayerOrderChangeEvent;
 import org.openstreetmap.josm.gui.layer.LayerManager.LayerRemoveEvent;
-import org.openstreetmap.josm.gui.layer.markerlayer.MarkerLayer;
 import org.openstreetmap.josm.tools.Shortcut;
 
 final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListener {
     private final AudioWaypointController controller;
-    private final JComboBox<MarkerLayer> layerCombo = new JComboBox<>();
+    private final JComboBox<Layer> layerCombo = new JComboBox<>();
     private final AudioWaypointTableModel tableModel = new AudioWaypointTableModel();
     private final JTable table = new JTable(tableModel);
     private boolean updating;
@@ -78,10 +78,10 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
         setLayout(new BorderLayout());
 
         JPanel top = new JPanel(new BorderLayout(5, 0));
-        layerCombo.setRenderer(new MarkerLayerCellRenderer());
+        layerCombo.setRenderer(new LayerCellRenderer());
         layerCombo.addActionListener(event -> {
             if (!updating) {
-                controller.setSelectedLayer((MarkerLayer) layerCombo.getSelectedItem());
+                controller.setSelectedLayer((Layer) layerCombo.getSelectedItem());
             }
         });
         top.add(layerCombo, BorderLayout.CENTER);
@@ -106,9 +106,9 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
     private void refreshLayers() {
         updating = true;
         try {
-            List<MarkerLayer> layers = controller.audioMarkerLayers();
-            layerCombo.setModel(new DefaultComboBoxModel<>(layers.toArray(MarkerLayer[]::new)));
-            MarkerLayer selected = controller.selectedLayer();
+            List<Layer> layers = controller.selectableLayers();
+            layerCombo.setModel(new DefaultComboBoxModel<>(layers.toArray(Layer[]::new)));
+            Layer selected = controller.selectedLayer();
             if (selected == null || !layers.contains(selected)) {
                 selected = layers.isEmpty() ? null : layers.get(0);
             }

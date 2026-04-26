@@ -14,6 +14,7 @@ import org.openstreetmap.josm.gui.MainApplication;
 import org.openstreetmap.josm.gui.MapFrame;
 import org.openstreetmap.josm.gui.MapView;
 import org.openstreetmap.josm.gui.layer.GpxLayer;
+import org.openstreetmap.josm.gui.layer.Layer;
 import org.openstreetmap.josm.gui.layer.markerlayer.AudioMarker;
 import org.openstreetmap.josm.gui.layer.markerlayer.Marker;
 import org.openstreetmap.josm.gui.layer.markerlayer.MarkerLayer;
@@ -22,21 +23,23 @@ import org.openstreetmap.josm.tools.Logging;
 import org.openstreetmap.josm.tools.date.Interval;
 
 final class AudioWaypointController {
-    private MarkerLayer selectedLayer;
+    private Layer selectedLayer;
     private List<AudioWaypoint> waypoints = List.of();
     private int currentIndex;
     private Runnable changeListener;
 
-    List<MarkerLayer> audioMarkerLayers() {
+    List<Layer> selectableLayers() {
         if (MainApplication.getLayerManager() == null) {
             return List.of();
         }
-        return MainApplication.getLayerManager().getLayersOfType(MarkerLayer.class).stream()
-                .filter(AudioWaypointController::hasAudioMarkers)
+        return MainApplication.getLayerManager().getLayers().stream()
+                .filter(layer -> layer instanceof MarkerLayer || layer instanceof GpxLayer)
+                .sorted(Comparator.comparingInt(AudioWaypointController::layerPriority)
+                        .thenComparing(Layer::getName, String.CASE_INSENSITIVE_ORDER))
                 .toList();
     }
 
-    MarkerLayer selectedLayer() {
+    Layer selectedLayer() {
         return selectedLayer;
     }
 
@@ -44,7 +47,7 @@ final class AudioWaypointController {
         this.changeListener = changeListener;
     }
 
-    void setSelectedLayer(MarkerLayer layer) {
+    void setSelectedLayer(Layer layer) {
         if (layer != selectedLayer) {
             selectedLayer = layer;
             refreshWaypoints();
@@ -110,22 +113,45 @@ final class AudioWaypointController {
 
     private void ensureWaypoints() {
         if (selectedLayer == null) {
-            selectedLayer = audioMarkerLayers().stream().findFirst().orElse(null);
+            selectedLayer = selectableLayers().stream().findFirst().orElse(null);
             refreshWaypoints();
         }
     }
 
     private void refreshWaypoints() {
-        waypoints = selectedLayer == null ? List.of() : collectAudioWaypoints(selectedLayer);
+        MarkerLayer markerLayer = resolveMarkerLayer(selectedLayer).orElse(null);
+        waypoints = markerLayer == null ? List.of() : collectAudioWaypoints(markerLayer);
     }
 
-    private static boolean hasAudioMarkers(MarkerLayer layer) {
-        for (Marker marker : layer.data) {
-            if (marker instanceof AudioMarker) {
-                return true;
+    private static int layerPriority(Layer layer) {
+        if (layer.getName().startsWith("Markers from ")) {
+            return 0;
+        }
+        if (layer instanceof MarkerLayer) {
+            return 1;
+        }
+        if (layer instanceof GpxLayer) {
+            return 2;
+        }
+        return 3;
+    }
+
+    private static Optional<MarkerLayer> resolveMarkerLayer(Layer layer) {
+        if (layer instanceof MarkerLayer markerLayer) {
+            return Optional.of(markerLayer);
+        }
+        if (layer instanceof GpxLayer gpxLayer) {
+            MarkerLayer linkedLayer = gpxLayer.getLinkedMarkerLayer();
+            if (linkedLayer != null) {
+                return Optional.of(linkedLayer);
+            }
+            if (MainApplication.getLayerManager() != null) {
+                return MainApplication.getLayerManager().getLayersOfType(MarkerLayer.class).stream()
+                        .filter(markerLayer -> markerLayer.fromLayer == gpxLayer)
+                        .findFirst();
             }
         }
-        return false;
+        return Optional.empty();
     }
 
     private List<AudioWaypoint> collectAudioWaypoints(MarkerLayer layer) {
