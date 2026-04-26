@@ -34,7 +34,7 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
     AudioWaypointDialog(AudioWaypointController controller) {
         super(
                 tr("Audio Waypoints"),
-                "audio-playpause",
+                "audiowptmarker",
                 tr("Review OsmTracker audio waypoints"),
                 Shortcut.registerShortcut("subwindow:audiowptmarker", tr("Toggle: {0}", tr("Audio Waypoints")),
                         java.awt.event.KeyEvent.VK_F8, Shortcut.ALT_SHIFT),

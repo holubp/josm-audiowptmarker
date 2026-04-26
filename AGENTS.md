@@ -5,3 +5,4 @@
 - Do not infer personal names or usernames for package paths, authorship, or metadata. Use only identity information explicitly provided by the maintainer.
 - Run `gradle test jar` before committing code changes.
 - Keep playback behavior delegated to JOSM's `AudioMarker.play()` path so it remains consistent with native marker playback.
+- Bundle plugin-owned icons under `src/main/resources/images/` and `src/main/resources/images/dialogs/`; do not rely on JOSM core image paths for required plugin/dialog icons.
