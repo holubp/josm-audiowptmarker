@@ -6,6 +6,7 @@ JOSM plugin for reviewing OsmTracker audio waypoints from an existing marker lay
 
 - Dockable dialog listing audio waypoints from a selected GPX or marker layer.
 - The layer selector shows all GPX and marker layers, with layers named `Markers from ...` sorted first.
+- If exactly one `Markers from ...` layer is present, it is selected automatically.
 - Columns for time relative to track start, audio duration, GPS coordinates, and absolute time.
 - Default waypoint order is by relative time from the start of the linked GPX track.
 - Keyboard and toolbar actions for current, previous, and next waypoint navigation.

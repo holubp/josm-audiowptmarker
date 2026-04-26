@@ -43,6 +43,25 @@ final class AudioWaypointController {
         return selectedLayer;
     }
 
+    Layer defaultLayer(List<Layer> layers) {
+        List<Layer> markerLayers = layers.stream()
+                .filter(AudioWaypointController::isMarkersFromLayer)
+                .toList();
+        if (markerLayers.size() == 1) {
+            return markerLayers.get(0);
+        }
+        return layers.isEmpty() ? null : layers.get(0);
+    }
+
+    boolean shouldAutoSelect(Layer selected, List<Layer> layers) {
+        boolean hasExactlyOneMarkersFromLayer = layers.stream()
+                .filter(AudioWaypointController::isMarkersFromLayer)
+                .limit(2)
+                .count() == 1;
+        return selected == null || !layers.contains(selected)
+                || hasExactlyOneMarkersFromLayer && !isMarkersFromLayer(selected);
+    }
+
     void setChangeListener(Runnable changeListener) {
         this.changeListener = changeListener;
     }
@@ -124,7 +143,7 @@ final class AudioWaypointController {
     }
 
     private static int layerPriority(Layer layer) {
-        if (layer.getName().startsWith("Markers from ")) {
+        if (isMarkersFromLayer(layer)) {
             return 0;
         }
         if (layer instanceof MarkerLayer) {
@@ -134,6 +153,10 @@ final class AudioWaypointController {
             return 2;
         }
         return 3;
+    }
+
+    private static boolean isMarkersFromLayer(Layer layer) {
+        return layer != null && layer.getName().startsWith("Markers from ");
     }
 
     private static Optional<MarkerLayer> resolveMarkerLayer(Layer layer) {

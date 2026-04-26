@@ -109,8 +109,8 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
             List<Layer> layers = controller.selectableLayers();
             layerCombo.setModel(new DefaultComboBoxModel<>(layers.toArray(Layer[]::new)));
             Layer selected = controller.selectedLayer();
-            if (selected == null || !layers.contains(selected)) {
-                selected = layers.isEmpty() ? null : layers.get(0);
+            if (controller.shouldAutoSelect(selected, layers)) {
+                selected = controller.defaultLayer(layers);
             }
             layerCombo.setSelectedItem(selected);
             controller.setSelectedLayer(selected);
