@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "org.openstreetmap.josm.plugins"
-version = "0.1.0"
+version = "0.1.1"
 
 def josmVersion = "19555"
 
@@ -33,7 +33,7 @@ jar {
                 "Plugin-Mainversion": josmVersion,
                 "Plugin-Minimum-Java-Version": "17",
                 "Plugin-Author": "Petr Holub",
-                "Plugin-Icon": "markers/audio-tracer"
+                "Plugin-Icon": "audio-playpause"
         )
     }
 }

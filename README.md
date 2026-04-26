@@ -9,6 +9,7 @@ JOSM plugin for reviewing OsmTracker audio waypoints from an existing marker lay
 - Default waypoint order is by relative time from the start of the linked GPX track.
 - Keyboard and toolbar actions for current, previous, and next waypoint navigation.
 - Shift variants of the navigation shortcuts also start playback by invoking JOSM's `AudioMarker.play()` path.
+- Default shortcuts are `Ctrl+Alt+J/K/L` for previous/current/next and `Ctrl+Alt+Shift+J/K/L` for previous/current/next and play.
 
 ## Build
 
