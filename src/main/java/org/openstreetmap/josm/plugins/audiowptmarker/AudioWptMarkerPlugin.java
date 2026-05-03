@@ -29,7 +29,9 @@ public final class AudioWptMarkerPlugin extends Plugin {
     @Override
     public void mapFrameInitialized(MapFrame oldFrame, MapFrame newFrame) {
         if (oldFrame != null && dialog != null) {
-            oldFrame.removeToggleDialog(dialog);
+            if (oldFrame.getToggleDialog(AudioWaypointDialog.class) == dialog) {
+                oldFrame.removeToggleDialog(dialog);
+            }
             dialog.destroy();
             dialog = null;
         }
