@@ -5,6 +5,8 @@ import static org.openstreetmap.josm.tools.I18n.tr;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
@@ -18,6 +20,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 import org.openstreetmap.josm.gui.MainApplication;
+import org.openstreetmap.josm.gui.MapFrame;
+import org.openstreetmap.josm.gui.MapView;
 import org.openstreetmap.josm.gui.Notification;
 import org.openstreetmap.josm.gui.dialogs.ToggleDialog;
 import org.openstreetmap.josm.gui.layer.Layer;
@@ -32,6 +36,13 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
     private final JComboBox<Layer> layerCombo = new JComboBox<>();
     private final AudioWaypointTableModel tableModel = new AudioWaypointTableModel();
     private final JTable table = new JTable(tableModel);
+    private final MouseAdapter mapClickListener = new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent event) {
+            controller.noteMapClick(event.getPoint());
+        }
+    };
+    private MapView listenedMapView;
     private boolean updating;
 
     AudioWaypointDialog(AudioWaypointController controller) {
@@ -49,10 +60,12 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
         if (MainApplication.getLayerManager() != null) {
             MainApplication.getLayerManager().addAndFireLayerChangeListener(this);
         }
+        installMapClickListener();
     }
 
     @Override
     public void destroy() {
+        uninstallMapClickListener();
         if (MainApplication.getLayerManager() != null) {
             MainApplication.getLayerManager().removeLayerChangeListener(this);
         }
@@ -91,8 +104,8 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
 
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.TRAILING, 0, 0));
         JButton sync = new JButton(tr("Sync"));
-        sync.setToolTipText(tr("Select the most recently played audio marker in this dialog"));
-        sync.addActionListener(event -> syncToRecentlyPlayedMarker());
+        sync.setToolTipText(tr("Select the last clicked or played audio marker from the selected layer"));
+        sync.addActionListener(event -> syncToLastMarker());
         buttons.add(sync);
 
         JButton refresh = new JButton(tr("Refresh"));
@@ -131,9 +144,9 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
         }
     }
 
-    private void syncToRecentlyPlayedMarker() {
-        if (!controller.syncToRecentlyPlayedAudioMarker()) {
-            new Notification(tr("No recently played JOSM audio marker is available in the current layers."))
+    private void syncToLastMarker() {
+        if (!controller.syncToLastSelectedLayerMarker()) {
+            new Notification(tr("No clicked or recently played audio marker is available in the selected layer."))
                     .setIcon(JOptionPane.INFORMATION_MESSAGE)
                     .show();
         }
@@ -166,5 +179,20 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
     @Override
     protected Dimension getDefaultDetachedSize() {
         return new Dimension(760, 360);
+    }
+
+    private void installMapClickListener() {
+        MapFrame mapFrame = MainApplication.getMap();
+        if (mapFrame != null) {
+            listenedMapView = mapFrame.mapView;
+            listenedMapView.addMouseListener(mapClickListener);
+        }
+    }
+
+    private void uninstallMapClickListener() {
+        if (listenedMapView != null) {
+            listenedMapView.removeMouseListener(mapClickListener);
+            listenedMapView = null;
+        }
     }
 }

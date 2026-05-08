@@ -1,7 +1,8 @@
 package org.openstreetmap.josm.plugins.audiowptmarker;
 
-import java.io.File;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -36,6 +37,7 @@ final class AudioWaypointController {
     private Layer selectedLayer;
     private List<AudioWaypoint> waypoints = List.of();
     private int currentIndex;
+    private Marker lastClickedMarker;
     private Runnable changeListener;
 
     List<Layer> selectableLayers() {
@@ -79,6 +81,7 @@ final class AudioWaypointController {
     void setSelectedLayer(Layer layer) {
         if (layer != selectedLayer) {
             selectedLayer = layer;
+            lastClickedMarker = null;
             refreshWaypoints();
             currentIndex = 0;
             fireChanged();
@@ -108,21 +111,29 @@ final class AudioWaypointController {
         fireChanged();
     }
 
-    boolean syncToRecentlyPlayedAudioMarker() {
-        AudioMarker recentlyPlayedMarker = AudioMarker.recentlyPlayedMarker();
-        if (recentlyPlayedMarker == null) {
-            return false;
+    void noteMapClick(Point point) {
+        MarkerLayer markerLayer = resolveMarkerLayer(selectedLayer).orElse(null);
+        if (markerLayer == null) {
+            return;
         }
-        selectedLayer = recentlyPlayedMarker.parentLayer;
-        refreshWaypoints();
-        for (int index = 0; index < waypoints.size(); index++) {
-            if (waypoints.get(index).marker() == recentlyPlayedMarker) {
-                currentIndex = index;
-                fireChanged();
-                return true;
+        for (Marker marker : markerLayer.data) {
+            if (isAudioWaypointMarker(marker) && marker.containsPoint(point)) {
+                lastClickedMarker = marker;
+                return;
             }
         }
-        return false;
+    }
+
+    boolean syncToLastSelectedLayerMarker() {
+        ensureWaypoints();
+        MarkerLayer markerLayer = resolveMarkerLayer(selectedLayer).orElse(null);
+        if (markerLayer == null) {
+            return false;
+        }
+        if (syncToMarker(lastClickedMarker, markerLayer)) {
+            return true;
+        }
+        return syncToMarker(AudioMarker.recentlyPlayedMarker(), markerLayer);
     }
 
     boolean current(boolean play) {
@@ -167,6 +178,21 @@ final class AudioWaypointController {
     private void refreshWaypoints() {
         MarkerLayer markerLayer = resolveMarkerLayer(selectedLayer).orElse(null);
         waypoints = markerLayer == null ? List.of() : collectAudioWaypoints(markerLayer);
+    }
+
+    private boolean syncToMarker(Marker marker, MarkerLayer markerLayer) {
+        if (marker == null || marker.parentLayer != markerLayer) {
+            return false;
+        }
+        refreshWaypoints();
+        for (int index = 0; index < waypoints.size(); index++) {
+            if (waypoints.get(index).marker() == marker) {
+                currentIndex = index;
+                fireChanged();
+                return true;
+            }
+        }
+        return false;
     }
 
     private static int layerPriority(Layer layer) {
