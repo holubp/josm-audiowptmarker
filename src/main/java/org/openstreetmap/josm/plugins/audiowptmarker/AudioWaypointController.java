@@ -108,6 +108,23 @@ final class AudioWaypointController {
         fireChanged();
     }
 
+    boolean syncToRecentlyPlayedAudioMarker() {
+        AudioMarker recentlyPlayedMarker = AudioMarker.recentlyPlayedMarker();
+        if (recentlyPlayedMarker == null) {
+            return false;
+        }
+        selectedLayer = recentlyPlayedMarker.parentLayer;
+        refreshWaypoints();
+        for (int index = 0; index < waypoints.size(); index++) {
+            if (waypoints.get(index).marker() == recentlyPlayedMarker) {
+                currentIndex = index;
+                fireChanged();
+                return true;
+            }
+        }
+        return false;
+    }
+
     boolean current(boolean play) {
         ensureWaypoints();
         if (waypoints.isEmpty()) {

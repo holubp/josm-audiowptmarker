@@ -4,10 +4,12 @@ import static org.openstreetmap.josm.tools.I18n.tr;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -16,6 +18,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 import org.openstreetmap.josm.gui.MainApplication;
+import org.openstreetmap.josm.gui.Notification;
 import org.openstreetmap.josm.gui.dialogs.ToggleDialog;
 import org.openstreetmap.josm.gui.layer.Layer;
 import org.openstreetmap.josm.gui.layer.LayerManager.LayerAddEvent;
@@ -86,9 +89,16 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
         });
         top.add(layerCombo, BorderLayout.CENTER);
 
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.TRAILING, 0, 0));
+        JButton sync = new JButton(tr("Sync"));
+        sync.setToolTipText(tr("Select the most recently played audio marker in this dialog"));
+        sync.addActionListener(event -> syncToRecentlyPlayedMarker());
+        buttons.add(sync);
+
         JButton refresh = new JButton(tr("Refresh"));
         refresh.addActionListener(event -> refreshLayers());
-        top.add(refresh, BorderLayout.EAST);
+        buttons.add(refresh);
+        top.add(buttons, BorderLayout.EAST);
         add(top, BorderLayout.NORTH);
 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -118,6 +128,14 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
             selectControllerRow();
         } finally {
             updating = false;
+        }
+    }
+
+    private void syncToRecentlyPlayedMarker() {
+        if (!controller.syncToRecentlyPlayedAudioMarker()) {
+            new Notification(tr("No recently played JOSM audio marker is available in the current layers."))
+                    .setIcon(JOptionPane.INFORMATION_MESSAGE)
+                    .show();
         }
     }
 

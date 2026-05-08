@@ -27,6 +27,7 @@ The plugin is designed for the review phase: it does not record audio and does n
 - Current waypoint selection in the table.
 - Navigation actions for current, previous, and next waypoint.
 - Optional play variants for each navigation action.
+- Explicit **Sync** button that moves the dialog selection to JOSM's most recently played native audio marker.
 - Support for JOSM-native audio markers and OsmTracker-style `.3gp`, `.3gpp`, and `.amr` links that JOSM represents as web markers.
 
 ## Opening The Dialog
@@ -44,6 +45,8 @@ Alt+Shift+F8
 ```
 
 The layer selector is at the top of the dialog. If there is only one layer named `Markers from ...`, it should be selected automatically. If not, select the marker layer or its related GPX layer manually.
+
+The **Sync** button next to **Refresh** selects JOSM's most recently played native audio marker in the table. Clicking or playing a marker in the main map view does not automatically move the dialog selection; use **Sync** when you explicitly want to align the dialog with the last played marker.
 
 ## Reviewing Notes
 
