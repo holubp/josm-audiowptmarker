@@ -8,14 +8,46 @@ This plugin adds a dedicated JOSM dialog and shortcuts for reviewing those recor
 
 ## Typical Workflow
 
-1. Record a GPX track with linked audio notes in OsmTracker or a similar tool.
-2. Open the GPX file in JOSM together with the referenced audio files.
-3. Let JOSM create the marker layer, usually named `Markers from ...`.
-4. Open the **Audio Waypoints** dialog.
-5. Step through the audio waypoints, recentering the map and playing recordings as needed.
-6. Add or update OSM data while listening to each note.
+1. Record a GPX track with linked audio notes in OsmTracker or a similar tool while mapping.
+2. Export or share the OsmTracker trip as an archive containing the GPX file and audio recordings.
+3. Unzip the archive on the computer where you run JOSM, keeping the GPX file and audio files together.
+4. Open the GPX file in JOSM and let JOSM create the related marker layer, usually named `Markers from ...`.
+5. Open the **Audio Waypoints** dialog and select the marker layer if it is not selected automatically.
+6. Step through the audio waypoints one by one, recentering the map and playing each recording as needed.
+7. Add or update OSM data in JOSM while listening to each note.
 
 The plugin is designed for the review phase: it does not record audio and does not import GPX/audio by itself. It works with layers already loaded by JOSM.
+
+## From OsmTracker To JOSM
+
+An effective audio-mapping session usually looks like this:
+
+1. Start tracking in OsmTracker before you begin riding or driving.
+2. Whenever you notice something worth mapping, tap the audio note button and say a short, specific note.
+3. Keep moving; do not stop for every sign, surface change, missing path, shop name, access restriction, or road detail.
+4. At the end of the survey, use OsmTracker's export or share function to create a trip archive.
+5. Transfer that archive to your editing computer.
+6. Unzip it into a normal directory. Do not move the audio files away from the GPX file, because the GPX links point to those recordings.
+7. Open the GPX file in JOSM.
+
+After loading the GPX, JOSM normally creates two related layers:
+
+- A GPX track layer showing where you moved.
+- A marker layer named like `Markers from survey.gpx`, containing the audio waypoints.
+
+Open **Windows -> Audio Waypoints**. If there is only one `Markers from ...` layer, the plugin selects it automatically. Otherwise, choose the marker layer for the trip you want to review.
+
+A typical review loop is:
+
+1. Press the current/next-and-play shortcut or use the toolbar action.
+2. JOSM recenters the map on the audio waypoint without changing your current zoom.
+3. Listen to the note.
+4. Edit the map at that position: add missing objects, adjust tags, split ways, fix access, add names, or mark things for later investigation.
+5. Move to the next audio waypoint.
+
+For example, during a bicycle survey you might record: "cycleway starts here, asphalt, separated from road", then a few minutes later: "bench and drinking water on right", and later: "track becomes gravel after bridge". In JOSM, the plugin lets you replay those notes in track order, jump the map to each exact recording location, and immediately make the corresponding edits while the context is still clear.
+
+The goal is to turn hundreds of short field recordings into a predictable editing checklist: one audio waypoint, one map location, one decision, then the next waypoint.
 
 ## Features
 
