@@ -18,7 +18,7 @@ Run the standard validation before committing:
 gradle test jar
 ```
 
-The resulting plugin jar is written to `build/libs/josm-audiowptmarker-<version>.jar`.
+The resulting plugin jar is written to `build/libs/audiowptmarker.jar`. Keep the release asset filename unversioned for JOSM plugin-list compatibility; the semantic version belongs in the jar manifest as `Plugin-Version`.
 
 ## Private Examples
 

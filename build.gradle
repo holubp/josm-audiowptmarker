@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "org.openstreetmap.josm.plugins"
-version = "0.1.8"
+version = "0.1.9"
 
 def josmVersion = "19555"
 
@@ -25,6 +25,8 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 jar {
+    archiveBaseName = "audiowptmarker"
+    archiveVersion = ""
     manifest {
         attributes(
                 "Plugin-Class": "org.openstreetmap.josm.plugins.audiowptmarker.AudioWptMarkerPlugin",

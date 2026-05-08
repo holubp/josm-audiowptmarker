@@ -74,13 +74,19 @@ The play actions use JOSM's native audio-marker playback when JOSM created an `A
 
 Download the latest jar from the GitHub releases page and place it in your JOSM plugins directory.
 
-Releases:
+Stable latest jar URL:
+
+```text
+https://github.com/holubp/josm-audiowptmarker/releases/latest/download/audiowptmarker.jar
+```
+
+Release page:
 
 ```text
 https://github.com/holubp/josm-audiowptmarker/releases
 ```
 
-Restart JOSM after installing or replacing the jar.
+Restart JOSM after installing or replacing the jar. The jar filename is unversioned for JOSM plugin-list compatibility; the plugin version is stored in the jar manifest as `Plugin-Version`.
 
 ## Build
 
@@ -88,4 +94,4 @@ Restart JOSM after installing or replacing the jar.
 gradle build
 ```
 
-The plugin jar is written to `build/libs/`.
+The plugin jar is written to `build/libs/audiowptmarker.jar`.
