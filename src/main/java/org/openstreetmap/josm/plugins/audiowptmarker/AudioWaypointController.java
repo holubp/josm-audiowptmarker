@@ -30,6 +30,13 @@ import org.openstreetmap.josm.tools.Logging;
 import org.openstreetmap.josm.tools.date.Interval;
 
 final class AudioWaypointController {
+    enum NavigationResult {
+        MOVED,
+        NO_WAYPOINTS,
+        BEFORE_FIRST,
+        AFTER_LAST
+    }
+
     private static final List<String> AUDIO_EXTENSIONS = List.of(
             ".wav", ".mp3", ".aac", ".aif", ".aiff", ".3gp", ".3gpp", ".amr"
     );
@@ -136,36 +143,42 @@ final class AudioWaypointController {
         return syncToMarker(AudioMarker.recentlyPlayedMarker(), markerLayer);
     }
 
-    boolean current(boolean play) {
+    NavigationResult current(boolean play) {
         ensureWaypoints();
         if (waypoints.isEmpty()) {
-            return false;
+            return NavigationResult.NO_WAYPOINTS;
         }
         recenterCurrent(play);
         fireChanged();
-        return true;
+        return NavigationResult.MOVED;
     }
 
-    boolean previous(boolean play) {
+    NavigationResult previous(boolean play) {
         ensureWaypoints();
         if (waypoints.isEmpty()) {
-            return false;
+            return NavigationResult.NO_WAYPOINTS;
         }
-        currentIndex = Math.max(0, currentIndex - 1);
+        if (currentIndex <= 0) {
+            return NavigationResult.BEFORE_FIRST;
+        }
+        currentIndex--;
         recenterCurrent(play);
         fireChanged();
-        return true;
+        return NavigationResult.MOVED;
     }
 
-    boolean next(boolean play) {
+    NavigationResult next(boolean play) {
         ensureWaypoints();
         if (waypoints.isEmpty()) {
-            return false;
+            return NavigationResult.NO_WAYPOINTS;
         }
-        currentIndex = Math.min(waypoints.size() - 1, currentIndex + 1);
+        if (currentIndex >= waypoints.size() - 1) {
+            return NavigationResult.AFTER_LAST;
+        }
+        currentIndex++;
         recenterCurrent(play);
         fireChanged();
-        return true;
+        return NavigationResult.MOVED;
     }
 
     private void ensureWaypoints() {
@@ -178,6 +191,11 @@ final class AudioWaypointController {
     private void refreshWaypoints() {
         MarkerLayer markerLayer = resolveMarkerLayer(selectedLayer).orElse(null);
         waypoints = markerLayer == null ? List.of() : collectAudioWaypoints(markerLayer);
+        if (waypoints.isEmpty()) {
+            currentIndex = 0;
+        } else {
+            currentIndex = Math.max(0, Math.min(currentIndex, waypoints.size() - 1));
+        }
     }
 
     private boolean syncToMarker(Marker marker, MarkerLayer markerLayer) {

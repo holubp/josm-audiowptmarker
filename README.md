@@ -70,6 +70,8 @@ The default shortcuts are:
 
 The play actions use JOSM's native audio-marker playback when JOSM created an `AudioMarker`. For OsmTracker `.3gpp`-style links that JOSM represents as web markers, the plugin invokes the same marker action as double-clicking the marker in JOSM.
 
+If you try to move before the first audio waypoint or after the last one, the plugin shows a warning dialog and does not replay the boundary waypoint.
+
 ## Installation
 
 Download the latest jar from the GitHub releases page and place it in your JOSM plugins directory.

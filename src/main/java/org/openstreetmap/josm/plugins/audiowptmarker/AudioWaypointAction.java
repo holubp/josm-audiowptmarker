@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JOptionPane;
 
 import org.openstreetmap.josm.actions.JosmAction;
+import org.openstreetmap.josm.gui.MainApplication;
 import org.openstreetmap.josm.gui.Notification;
 import org.openstreetmap.josm.tools.Shortcut;
 
@@ -38,16 +39,29 @@ final class AudioWaypointAction extends JosmAction {
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        boolean moved = switch (move) {
+        AudioWaypointController.NavigationResult result = switch (move) {
             case PREVIOUS -> controller.previous(play);
             case CURRENT -> controller.current(play);
             case NEXT -> controller.next(play);
         };
-        if (!moved) {
-            new Notification(tr("No audio waypoints are available in the selected marker layer."))
+        switch (result) {
+            case MOVED -> {
+                // No UI feedback needed for successful navigation.
+            }
+            case NO_WAYPOINTS -> new Notification(tr("No audio waypoints are available in the selected marker layer."))
                     .setIcon(JOptionPane.INFORMATION_MESSAGE)
                     .show();
+            case BEFORE_FIRST -> showBoundaryWarning(tr("Already at the first audio waypoint."));
+            case AFTER_LAST -> showBoundaryWarning(tr("Already at the last audio waypoint."));
         }
+    }
+
+    private static void showBoundaryWarning(String message) {
+        JOptionPane.showMessageDialog(
+                MainApplication.getMainFrame(),
+                message,
+                tr("Audio Waypoints"),
+                JOptionPane.WARNING_MESSAGE);
     }
 
     private static String toolbarId(String name) {
