@@ -20,6 +20,38 @@ gradle test jar
 
 The resulting plugin jar is written to `build/libs/audiowptmarker.jar`. Keep the release asset filename unversioned for JOSM plugin-list compatibility; the semantic version belongs in the jar manifest as `Plugin-Version`.
 
+Before publishing a release, inspect the built jar manifest:
+
+```sh
+unzip -p build/libs/audiowptmarker.jar META-INF/MANIFEST.MF
+```
+
+Confirm these entries are correct:
+
+- `Plugin-Version`: the semantic release version.
+- `Plugin-Mainversion`: the minimum supported JOSM version.
+- `Plugin-Class`: the plugin entry point.
+- `Plugin-Minimum-Java-Version`: the minimum supported Java version.
+- `Plugin-Icon`: the bundled plugin icon name.
+
+## Release Policy
+
+JOSM official plugin sources expect a stable jar URL. Publish the primary GitHub release asset as:
+
+```text
+audiowptmarker.jar
+```
+
+Do not publish a versioned filename such as `audiowptmarker-0.1.9.jar` as the primary asset. Versioning belongs in the Git tag, GitHub release name, and the jar manifest `Plugin-Version`.
+
+The stable URL for JOSM plugin-list use is:
+
+```text
+https://github.com/holubp/josm-audiowptmarker/releases/latest/download/audiowptmarker.jar
+```
+
+When creating GitHub releases from the command line, use `--notes-file` or another newline-safe method so release notes contain real newlines, not literal `\n` text.
+
 ## Private Examples
 
 `examples-private/` is intentionally git-ignored because it may contain private GPX tracks and audio recordings. Use it only for local manual testing and never include files from it in commits, releases, or public documentation.
