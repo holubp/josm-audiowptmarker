@@ -29,6 +29,7 @@ import org.openstreetmap.josm.gui.layer.LayerManager.LayerAddEvent;
 import org.openstreetmap.josm.gui.layer.LayerManager.LayerChangeListener;
 import org.openstreetmap.josm.gui.layer.LayerManager.LayerOrderChangeEvent;
 import org.openstreetmap.josm.gui.layer.LayerManager.LayerRemoveEvent;
+import org.openstreetmap.josm.tools.Logging;
 import org.openstreetmap.josm.tools.Shortcut;
 
 final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListener {
@@ -43,6 +44,8 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
         }
     };
     private MapView listenedMapView;
+    private boolean layerChangeListenerRegistered;
+    private boolean destroyed;
     private boolean updating;
 
     AudioWaypointDialog(AudioWaypointController controller) {
@@ -57,18 +60,19 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
         this.controller = controller;
         this.controller.setChangeListener(this::syncFromController);
         buildContent();
-        if (MainApplication.getLayerManager() != null) {
-            MainApplication.getLayerManager().addAndFireLayerChangeListener(this);
-        }
+        installLayerChangeListener();
         installMapClickListener();
     }
 
     @Override
     public void destroy() {
-        uninstallMapClickListener();
-        if (MainApplication.getLayerManager() != null) {
-            MainApplication.getLayerManager().removeLayerChangeListener(this);
+        if (destroyed) {
+            return;
         }
+        destroyed = true;
+        controller.setChangeListener(null);
+        uninstallMapClickListener();
+        uninstallLayerChangeListener();
         super.destroy();
     }
 
@@ -193,6 +197,29 @@ final class AudioWaypointDialog extends ToggleDialog implements LayerChangeListe
         if (listenedMapView != null) {
             listenedMapView.removeMouseListener(mapClickListener);
             listenedMapView = null;
+        }
+    }
+
+    private void installLayerChangeListener() {
+        if (!layerChangeListenerRegistered && MainApplication.getLayerManager() != null) {
+            MainApplication.getLayerManager().addAndFireLayerChangeListener(this);
+            layerChangeListenerRegistered = true;
+        }
+    }
+
+    private void uninstallLayerChangeListener() {
+        if (!layerChangeListenerRegistered) {
+            return;
+        }
+        layerChangeListenerRegistered = false;
+        if (MainApplication.getLayerManager() == null) {
+            return;
+        }
+        try {
+            MainApplication.getLayerManager().removeLayerChangeListener(this);
+        } catch (IllegalArgumentException exception) {
+            // JOSM clears layer listeners while removing the final layer before plugin teardown.
+            Logging.debug(exception);
         }
     }
 }
