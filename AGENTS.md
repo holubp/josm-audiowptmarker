@@ -10,3 +10,4 @@
 - Use a release notes file or another newline-safe mechanism for GitHub release notes; do not pass shell-escaped `\n` text that renders literally.
 - Keep playback behavior delegated to JOSM's `AudioMarker.play()` path so it remains consistent with native marker playback.
 - Bundle plugin-owned icons under `src/main/resources/images/` and `src/main/resources/images/dialogs/`; do not rely on JOSM core image paths for required plugin/dialog icons.
+- Make JOSM lifecycle cleanup idempotent. Dialog/listener teardown must tolerate JOSM already removing dialogs, clearing layer listeners, or destroying the map frame during final-layer removal.

@@ -63,3 +63,5 @@ The plugin operates on marker layers that JOSM has already created from a GPX la
 Playback is delegated to JOSM's `AudioMarker.play()` method so behavior stays aligned with double-clicking an audio marker in JOSM.
 
 Navigation recenters `MapView` on the selected `AudioMarker` and intentionally keeps the current zoom level.
+
+JOSM may remove the final layer and clear layer listeners before plugin dialogs are destroyed. Dialog cleanup must therefore be idempotent: track listener registration state, tolerate already-cleared listeners, and detach callbacks from destroyed dialogs.
